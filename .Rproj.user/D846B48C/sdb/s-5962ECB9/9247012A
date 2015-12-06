@@ -1,0 +1,17 @@
+{
+    "contents" : "# RJIRA\n\nThis is ht R package \"RJIRA\" written and mantained by \"Alfonso de Uña\" (briofons@gmail.com)\n\n## Installation\n You can install this unstable version by devtools\n\n```r\nlibrary(devtools); install_github('briofons/R-Package-RJIRA')\n```\n\n## RJIRA\nThis package was created to retreive data from issues. Once you can get all information that you want, you can visualize and create your own analytics from JIRA to understand better your system or your workflow system   ",
+    "created" : 1449360247832.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "173659323",
+    "id" : "9247012A",
+    "lastKnownWriteTime" : 1449360795,
+    "path" : "~/RJIRA/README.md",
+    "project_path" : "README.md",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "source_on_save" : false,
+    "type" : "markdown"
+}
