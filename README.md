@@ -1,6 +1,6 @@
 # RJIRA
 
-This is ht R package "RJIRA" written and mantained by "Alfonso de Uña" (briofons@gmail.com)
+This is the R package "RJIRA" written and mantained by "Alfonso de Uña" (briofons@gmail.com)
 
 ## Installation
  You can install this unstable version by devtools
