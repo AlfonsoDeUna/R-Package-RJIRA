@@ -9,25 +9,26 @@ simpleConnection <- function (URL, port, version=NULL) {
     rapiVersion <- version
   
   simpleURL <- cat("https://",URL,":",port,"/rest/api/", rapiVersion,"/", sep="")
+  
   return(simpleURL)
 }
 
 createRow <- function (dat) {
-  row <- c ( convertNull2NA(jsIssue$key),
-            convertNull2NA(jsIssue$fields$summary),
-            convertNull2NA(jsIssue$fields$issuetype$name),
-            convertNull2NA(jsIssue$fields$issuetype$id),
-            convertNull2NA(jsIssue$fields$status$name),
-            convertNull2NA(jsIssue$fields$status$id),
-            convertNull2NA(jsIssue$fields$reporter$name),
-            convertNull2NA(jsIssue$fields$reporter$emailAddress),
-            convertNull2NA(jsIssue$fields$reporter$displayName),
-            convertNull2NA(jsIssue$fields$assignee$name),
-            convertNull2NA(jsIssue$fields$assignee$emailAddress),
-            convertNull2NA(jsIssue$fields$assignee$displayName),
-            convertNull2NA(jsIssue$fields$project$id),
-            convertNull2NA(jsIssue$fields$project$name),
-            convertNull2NA(jsIssue$comment$total))
+  row <- c ( convertNull2NA(dat$key),
+            convertNull2NA(dat$fields$summary),
+            convertNull2NA(dat$fields$issuetype$name),
+            convertNull2NA(dat$fields$issuetype$id),
+            convertNull2NA(dat$fields$status$name),
+            convertNull2NA(dat$fields$status$id),
+            convertNull2NA(dat$fields$reporter$name),
+            convertNull2NA(dat$fields$reporter$emailAddress),
+            convertNull2NA(dat$reporter$displayName),
+            convertNull2NA(dat$assignee$name),
+            convertNull2NA(dat$fields$assignee$emailAddress),
+            convertNull2NA(dat$fields$assignee$displayName),
+            convertNull2NA(dat$fields$project$id),
+            convertNull2NA(dat$fields$project$name),
+            convertNull2NA(dat$comment$total))
   return(row)
 }
 
@@ -36,28 +37,15 @@ createRow <- function (dat) {
 getIssue <- function (conn, key, type = "GET") {
   
   con<-cat(conn,"/issue/",key,sep="")
-  jsIssue <- fromJSON(con)
+  campaignJSON = getURL(url = paste(conn,'issue/',key,sep="") ,.opts = list(ssl.verifypeer = FALSE))
+  jsIssue <- fromJSON(campaignJSON)
   
   #create a table
   
  
-dt <- data.frame ( convertNull2NA(jsIssue$key),
-                  convertNull2NA(jsIssue$fields$summary),
-                  convertNull2NA(jsIssue$fields$issuetype$name),
-                  convertNull2NA(jsIssue$fields$issuetype$id),
-                  convertNull2NA(jsIssue$fields$status$name),
-                  convertNull2NA(jsIssue$fields$status$id),
-                  convertNull2NA(jsIssue$fields$reporter$name),
-                  convertNull2NA(jsIssue$fields$reporter$emailAddress),
-                  convertNull2NA(jsIssue$fields$reporter$displayName),
-                  convertNull2NA(jsIssue$fields$assignee$name),
-                  convertNull2NA(jsIssue$fields$assignee$emailAddress),
-                  convertNull2NA(jsIssue$fields$assignee$displayName),
-                  convertNull2NA(jsIssue$fields$project$id),
-                  convertNull2NA(jsIssue$fields$project$name),
-                  convertNull2NA(jsIssue$comment$total))
+  dt <- data.frame (createRow (jsIssue))
   
-  cols <- c("key",
+  cols <- c(   "key",
                "summary",
                "issueType.name",
                "issueType.IsSubtask",
@@ -74,15 +62,17 @@ dt <- data.frame ( convertNull2NA(jsIssue$key),
                "comments.total"
   )
   
-  colnames(dt)<-cols
+  #colnames(dt)<-cols
   
   return(dt)
                     
 }
 
 ## for testing https://jira.atlassian.com/rest/api/latest/search?
-freeQuery <-function (conn, query = NULL) {
-  jsIssue <- fromJSON(conn)
+freeQuery <-function (conn, jql = NULL) {
+ 
+  campaignJSON = getURL(url = paste(conn,jql,sep="") ,.opts = list(ssl.verifypeer = FALSE))
+  jsIssue <- fromJSON(campaignJSON)
   lista<-jsIssue$issue$key
   cont <-0
   for (i in lista){
@@ -90,12 +80,13 @@ freeQuery <-function (conn, query = NULL) {
       data<-getIssue (conn, i)
     }
     else{
-      con<-cat(conn,"/issue/",key,sep="")
-      jsIssue <- fromJSON(con)
+      campaignJSON = getURL(url = paste(conn,'issue/',i,sep="") ,.opts = list(ssl.verifypeer = FALSE))
+      jsIssue <- fromJSON(campaignJSON)
       rbind (data, createRow(jsIssue))
     }
+    cont <- cont +1
   }
-  
+  return (data)
   
 }
 
