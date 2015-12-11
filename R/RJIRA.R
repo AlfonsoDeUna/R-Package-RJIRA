@@ -1,4 +1,17 @@
+##' -----------------------------------------------------------------
+##' R interface with JIRA instance
+##' @author Alfonso de Uña del Brio <briofons@gmail.com
+##' 
+##' Interface with JIRA with the idea
+##' to get information that you need to start making
+##' study about your issues.
+##' 
+##' 
+##'
+##'
 
+library(RCurl)
+library(jsonlite)
 
 ## Create the connection without OAUTH authentication
 simpleConnection <- function (URL, port, version=NULL) {
@@ -14,7 +27,7 @@ simpleConnection <- function (URL, port, version=NULL) {
 }
 
 createRow <- function (dat) {
-  row <- c ( convertNull2NA(dat$key),
+  row <- list( convertNull2NA(dat$key),
             convertNull2NA(dat$fields$summary),
             convertNull2NA(dat$fields$issuetype$name),
             convertNull2NA(dat$fields$issuetype$id),
@@ -43,7 +56,7 @@ getIssue <- function (conn, key, type = "GET") {
   #create a table
   
  
-  dt <- data.frame (createRow (jsIssue))
+  dt <- data.frame (createRow (jsIssue), stringsAsFactors=FALSE)
   
   cols <- c(   "key",
                "summary",
@@ -62,7 +75,7 @@ getIssue <- function (conn, key, type = "GET") {
                "comments.total"
   )
   
-  #colnames(dt)<-cols
+  colnames(dt)<-cols
   
   return(dt)
                     
@@ -80,9 +93,10 @@ freeQuery <-function (conn, jql = NULL) {
       data<-getIssue (conn, i)
     }
     else{
+      print (i)
       campaignJSON = getURL(url = paste(conn,'issue/',i,sep="") ,.opts = list(ssl.verifypeer = FALSE))
       jsIssue <- fromJSON(campaignJSON)
-      rbind (data, createRow(jsIssue))
+      data<-rbind(data,createRow(jsIssue))
     }
     cont <- cont +1
   }
