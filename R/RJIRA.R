@@ -1,20 +1,28 @@
-#' @title RJIRA: interface between JIRA and R
-#'
-#' @description This package wraps JIRA and R with the idea
-#' to get information about your JIRA instances. This package uses REST API
-#' JIRA
-#'
-#'
+##' -----------------------------------------------------------------
+##' R interface with JIRA instance
+##' @author Alfonso de Uña del Brio <briofons@gmail.com>
+##' 
+##' Interface with JIRA with the idea
+##' to get information that you need to start making
+##' studies from your issues.
+##' 
+##' 
+##'
+##'
 
 
-#' Create the connection without OAUTH authentication
-#' 
-#' It's a simple connection to JIRA we only need the URL and 
-#' port for JIRA and prepare the URL Base for REST
-#' 
-#' 
-#' @return It creates a base url for REST API to call.
+library(RCurl)
+library(jsonlite)
 
+##' 
+##' It creates the connection without OAUTH authentication
+##' 
+##' @param URL Base JIRA direction
+##' @param port Port JIRA (by default 8080)
+##' @param version (Rest API JIRA)
+##' 
+##' @return Base URL for use REST API
+##' 
 simpleConnection <- function (URL, port, version=NULL) {
   
   if (is.null(version)|| (version != 2 &  version !=1))
@@ -22,67 +30,54 @@ simpleConnection <- function (URL, port, version=NULL) {
   else
     rapiVersion <- version
   
-  simpleURL <- cat("https://",URL,":",port,"/rest/api/", rapiVersion,"/", sep="")
+  simpleURL <- cat("https://",URL,":",port,"/rest/api/", rapiVersion,"/", sep="") 
   return(simpleURL)
+  
 }
 
-
-
-#'
-#'
-#'
-#'
-#'
+##'
+##'
+##'
+##'
+##'
 createRow <- function (dat) {
-  row <- c ( convertNull2NA(jsIssue$key),
-            convertNull2NA(jsIssue$fields$summary),
-            convertNull2NA(jsIssue$fields$issuetype$name),
-            convertNull2NA(jsIssue$fields$issuetype$id),
-            convertNull2NA(jsIssue$fields$status$name),
-            convertNull2NA(jsIssue$fields$status$id),
-            convertNull2NA(jsIssue$fields$reporter$name),
-            convertNull2NA(jsIssue$fields$reporter$emailAddress),
-            convertNull2NA(jsIssue$fields$reporter$displayName),
-            convertNull2NA(jsIssue$fields$assignee$name),
-            convertNull2NA(jsIssue$fields$assignee$emailAddress),
-            convertNull2NA(jsIssue$fields$assignee$displayName),
-            convertNull2NA(jsIssue$fields$project$id),
-            convertNull2NA(jsIssue$fields$project$name),
-            convertNull2NA(jsIssue$comment$total))
+  row <- list( convertNull2NA(dat$key),
+            convertNull2NA(dat$fields$summary),
+            convertNull2NA(dat$fields$issuetype$name),
+            convertNull2NA(dat$fields$issuetype$id),
+            convertNull2NA(dat$fields$status$name),
+            convertNull2NA(dat$fields$status$id),
+            convertNull2NA(dat$fields$reporter$name),
+            convertNull2NA(dat$fields$reporter$emailAddress),
+            convertNull2NA(dat$reporter$displayName),
+            convertNull2NA(dat$assignee$name),
+            convertNull2NA(dat$fields$assignee$emailAddress),
+            convertNull2NA(dat$fields$assignee$displayName),
+            convertNull2NA(dat$fields$project$id),
+            convertNull2NA(dat$fields$project$name),
+            convertNull2NA(dat$comment$total))
   return(row)
 }
 
-#' 
-#' For retrieving the most interesting information from 
-#' request issue to dataframe
-#' 
-#' 
-#' 
+##'
+##' 
+##'   For retrieving the most interesting information from 
+##'   request issue to dataframe
+##'   
+##'   @param conn
+##'   @param key
+##'   @param type (by default GET)
+##'   
 getIssue <- function (conn, key, type = "GET") {
   
   con<-cat(conn,"/issue/",key,sep="")
-  jsIssue <- fromJSON(con)
+  campaignJSON = getURL(url = paste(conn,'issue/',key,sep="") ,.opts = list(ssl.verifypeer = FALSE))
+  jsIssue <- fromJSON(campaignJSON)
   
-  #create a table
+  #
+  dt <- data.frame (createRow (jsIssue), stringsAsFactors=FALSE)
   
- 
-dt <- data.frame ( convertNull2NA(jsIssue$key),
-                  convertNull2NA(jsIssue$fields$summary),
-                  convertNull2NA(jsIssue$fields$issuetype$name),
-                  convertNull2NA(jsIssue$fields$issuetype$id),
-                  convertNull2NA(jsIssue$fields$status$name),
-                  convertNull2NA(jsIssue$fields$status$id),
-                  convertNull2NA(jsIssue$fields$reporter$name),
-                  convertNull2NA(jsIssue$fields$reporter$emailAddress),
-                  convertNull2NA(jsIssue$fields$reporter$displayName),
-                  convertNull2NA(jsIssue$fields$assignee$name),
-                  convertNull2NA(jsIssue$fields$assignee$emailAddress),
-                  convertNull2NA(jsIssue$fields$assignee$displayName),
-                  convertNull2NA(jsIssue$fields$project$id),
-                  convertNull2NA(jsIssue$fields$project$name),
-                  convertNull2NA(jsIssue$comment$total))
-  
-  cols <- c("key",
+  cols <- c(   "key",
                "summary",
                "issueType.name",
                "issueType.IsSubtask",
@@ -105,9 +100,18 @@ dt <- data.frame ( convertNull2NA(jsIssue$key),
                     
 }
 
-## for testing https://jira.atlassian.com/rest/api/latest/search?
-freeQuery <-function (conn, query = NULL) {
-  jsIssue <- fromJSON(conn)
+##'
+##'    for testing https://jira.atlassian.com/rest/api/latest/search?
+##'    
+##'
+##'    @param conn
+##'    @param String with the format of jql (JIRA Query Language)
+##'        
+##'                
+freeQuery <-function (conn, jql = NULL) {
+ 
+  campaignJSON = getURL(url = paste(conn,jql,sep="") ,.opts = list(ssl.verifypeer = FALSE))
+  jsIssue <- fromJSON(campaignJSON)
   lista<-jsIssue$issue$key
   cont <-0
   for (i in lista){
@@ -115,12 +119,14 @@ freeQuery <-function (conn, query = NULL) {
       data<-getIssue (conn, i)
     }
     else{
-      con<-cat(conn,"/issue/",key,sep="")
-      jsIssue <- fromJSON(con)
-      rbind (data, createRow(jsIssue))
+      print (i)
+      campaignJSON = getURL(url = paste(conn,'issue/',i,sep="") ,.opts = list(ssl.verifypeer = FALSE))
+      jsIssue <- fromJSON(campaignJSON)
+      data<-rbind(data,createRow(jsIssue))
     }
+    cont <- cont +1
   }
-  
+  return (data)
   
 }
 
