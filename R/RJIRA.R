@@ -1,6 +1,20 @@
+#' @title RJIRA: interface between JIRA and R
+#'
+#' @description This package wraps JIRA and R with the idea
+#' to get information about your JIRA instances. This package uses REST API
+#' JIRA
+#'
+#'
 
 
-## Create the connection without OAUTH authentication
+#' Create the connection without OAUTH authentication
+#' 
+#' It's a simple connection to JIRA we only need the URL and 
+#' port for JIRA and prepare the URL Base for REST
+#' 
+#' 
+#' @return It creates a base url for REST API to call.
+
 simpleConnection <- function (URL, port, version=NULL) {
   
   if (is.null(version)|| (version != 2 &  version !=1))
@@ -12,6 +26,13 @@ simpleConnection <- function (URL, port, version=NULL) {
   return(simpleURL)
 }
 
+
+
+#'
+#'
+#'
+#'
+#'
 createRow <- function (dat) {
   row <- c ( convertNull2NA(jsIssue$key),
             convertNull2NA(jsIssue$fields$summary),
@@ -31,8 +52,12 @@ createRow <- function (dat) {
   return(row)
 }
 
-# For retrieving the most interesting information from 
-# request issue to dataframe
+#' 
+#' For retrieving the most interesting information from 
+#' request issue to dataframe
+#' 
+#' 
+#' 
 getIssue <- function (conn, key, type = "GET") {
   
   con<-cat(conn,"/issue/",key,sep="")
