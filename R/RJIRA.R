@@ -1,31 +1,62 @@
-##' -----------------------------------------------------------------
-##' R interface with JIRA instance
-##' @author Alfonso de Uña del Brio <briofons@gmail.com
-##' 
-##' Interface with JIRA with the idea
-##' to get information that you need to start making
-##' study about your issues.
-##' 
-##' 
-##'
-##'
+##============================================================================
+## RJIRA - R interface with JIRA instance
+## CopyRight (c) 2016
+## @author Alfonso de Uña del Brio <briofons@gmail.com
+## 
+## Interface with JIRA with the idea
+## to get information that you need to start making
+## study about your issues.
+## 
+## This program is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program.  If not, see <http://www.gnu.org/licenses/>.
+##=============================================================================
+
 
 library(RCurl)
 library(jsonlite)
 
 ## Create the connection without OAUTH authentication
-simpleConnection <- function (URL, port, version=NULL) {
+simpleConnection <- function (JIRAServer, port, version=NULL) {
   
-  if (is.null(version)|| (version != 2 &  version !=1))
+  if (is.null(version)|| (version != 2 &  version !=1)) {
     rapiVersion <- "latatest"
-  else
+  }else{
     rapiVersion <- version
-  
-  simpleURL <- cat("https://",URL,":",port,"/rest/api/", rapiVersion,"/", sep="")
+  }
+  simpleURL <- cat("https://",JIRAServer,":",port,"/rest/api/", rapiVersion,"/", sep="")
   
   return(simpleURL)
 }
 
+#' Create a row from most important dataframe from issue 
+#'
+#' key: Issue Key
+#' summary: Short description from issue
+#' issueType name: name from issue type
+#' issueType id: internal id
+#' status name: the last status name
+#' status id: internal status
+#' reporter short name
+#' reporter email address
+#' reporter long name
+#' assgnee short name
+#' assignee email
+#' assignee long name
+#' internal identificator project
+#' project name
+#' number of comments from issue
+#' @param information retrieving data frame from issue
+#' @return list
 createRow <- function (dat) {
   row <- list( convertNull2NA(dat$key),
             convertNull2NA(dat$fields$summary),
@@ -45,19 +76,16 @@ createRow <- function (dat) {
   return(row)
 }
 
-# For retrieving the most interesting information from 
-# request issue to dataframe
+#' For retrieving the most interesting information from 
+#' request issue to dataframe
+#' 
+#' 
+#' @return dataframe information 
 getIssue <- function (conn, key, type = "GET") {
-  
   con<-cat(conn,"/issue/",key,sep="")
   campaignJSON = getURL(url = paste(conn,'issue/',key,sep="") ,.opts = list(ssl.verifypeer = FALSE))
   jsIssue <- fromJSON(campaignJSON)
-  
-  #create a table
-  
- 
   dt <- data.frame (createRow (jsIssue), stringsAsFactors=FALSE)
-  
   cols <- c(   "key",
                "summary",
                "issueType.name",
@@ -74,16 +102,18 @@ getIssue <- function (conn, key, type = "GET") {
                "project.name",
                "comments.total"
   )
-  
   colnames(dt)<-cols
-  
   return(dt)
                     
 }
 
-## for testing https://jira.atlassian.com/rest/api/latest/search?
+#' Freequery get information from jql if we don't have jql we use
+#' this rest Api callhttps://jira.atlassian.com/rest/api/latest/search?
+#' 
+#' @param connection URL
+#' @param jql
+#' @return dataframe
 freeQuery <-function (conn, jql = NULL) {
- 
   campaignJSON = getURL(url = paste(conn,jql,sep="") ,.opts = list(ssl.verifypeer = FALSE))
   jsIssue <- fromJSON(campaignJSON)
   lista<-jsIssue$issue$key
@@ -101,9 +131,10 @@ freeQuery <-function (conn, jql = NULL) {
     cont <- cont +1
   }
   return (data)
-  
 }
 
+#' Convert all null to NA
+#' internal function
 convertNull2NA <- function (x) {
   if (is.null(x))
     return(NA)
