@@ -1,3 +1,4 @@
+
 ##============================================================================
 ## RJIRA - R interface with JIRA instance
 ## CopyRight (c) 2016
@@ -20,12 +21,18 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ##=============================================================================
-
-
 library(RCurl)
 library(jsonlite)
 
-## Create the connection without OAUTH authentication
+##' 
+##' It creates the connection without OAUTH authentication
+##' 
+##' @param URL Base JIRA direction
+##' @param port Port JIRA (by default 8080)
+##' @param version (Rest API JIRA)
+##' 
+##' @return Base URL for use REST API
+##' 
 simpleConnection <- function (JIRAServer, port, version=NULL) {
   
   if (is.null(version)|| (version != 2 &  version !=1)) {
@@ -34,8 +41,8 @@ simpleConnection <- function (JIRAServer, port, version=NULL) {
     rapiVersion <- version
   }
   simpleURL <- cat("https://",JIRAServer,":",port,"/rest/api/", rapiVersion,"/", sep="")
-  
   return(simpleURL)
+  
 }
 
 #' Create a row from most important dataframe from issue 
@@ -76,11 +83,15 @@ createRow <- function (dat) {
   return(row)
 }
 
-#' For retrieving the most interesting information from 
-#' request issue to dataframe
-#' 
-#' 
-#' @return dataframe information 
+##'  getIssue
+##' 
+##'  For retrieving the most interesting information from 
+##'  request issue to dataframe
+##'   
+##'   @param conn
+##'   @param key
+##'   @param type (by default GET)
+##'   
 getIssue <- function (conn, key, type = "GET") {
   con<-cat(conn,"/issue/",key,sep="")
   campaignJSON = getURL(url = paste(conn,'issue/',key,sep="") ,.opts = list(ssl.verifypeer = FALSE))
@@ -107,12 +118,15 @@ getIssue <- function (conn, key, type = "GET") {
                     
 }
 
-#' Freequery get information from jql if we don't have jql we use
-#' this rest Api callhttps://jira.atlassian.com/rest/api/latest/search?
-#' 
-#' @param connection URL
-#' @param jql
-#' @return dataframe
+
+##'
+##'    for testing https://jira.atlassian.com/rest/api/latest/search?
+##'    
+##'
+##'    @param conn
+##'    @param String with the format of jql (JIRA Query Language)
+##'        
+##'                
 freeQuery <-function (conn, jql = NULL) {
   campaignJSON = getURL(url = paste(conn,jql,sep="") ,.opts = list(ssl.verifypeer = FALSE))
   jsIssue <- fromJSON(campaignJSON)
