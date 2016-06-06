@@ -1,9 +1,9 @@
 Package: RJIRA
 Type: Package
-Title: What the package does (short line)
+Title: JIRA Rest API interface 
 Version: 1.0
 Date: 2015-12-05
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
-Description: More about what it does (maybe more than one line)
-License: What license is it under?
+Author: Alfonso de Uña
+Maintainer: briofons@gmail.com
+Description: Simple connection way to JIRA
+License: GPU
