@@ -1,0 +1,17 @@
+{
+    "contents" : "library(devtools); \ninstall_github('briofons/R-Package-RJIRA')\nlibrary(RJIRA)\n\nurl<-simpleConnection (\"jira.atlassian.com\" ,80)",
+    "created" : 1456787127601.000,
+    "dirty" : true,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "2367522941",
+    "id" : "43C2DB46",
+    "lastKnownWriteTime" : 27866499440705583,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}
